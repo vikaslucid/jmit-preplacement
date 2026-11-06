@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JMIT Pre-Placement Program</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: one calm app shell, a top bar with role switch, tabbed views, cards on a cool grey-green ground. */
+:root{
+  --bg:#f1f4f3; --surface:#ffffff; --surface2:#e8eeec; --ink:#12201c; --muted:#53645e; --line:#d6dfdc;
+  --brand:#0b5d4b; --brand-ink:#ffffff; --accent:#e8a317; --nontech:#4a4fb3;
+  --good:#1f7a4d; --warn:#9a6a0b; --bad:#b42318;
+  --good-bg:#e3f3ea; --warn-bg:#fbf0d6; --bad-bg:#fbe4e1;
+  --display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --body:'Figtree','Segoe UI',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1614; --surface:#16221f; --surface2:#1d2d29; --ink:#e8f0ed; --muted:#9fb2ab; --line:#2a3a35;
+    --brand:#3fbf9f; --brand-ink:#08201a; --accent:#f2b84b; --nontech:#9a9ef2;
+    --good:#58c98e; --warn:#f2b84b; --bad:#f08a80;
+    --good-bg:#17332a; --warn-bg:#3a2f12; --bad-bg:#3b1d1a; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1614; --surface:#16221f; --surface2:#1d2d29; --ink:#e8f0ed; --muted:#9fb2ab; --line:#2a3a35;
+  --brand:#3fbf9f; --brand-ink:#08201a; --accent:#f2b84b; --nontech:#9a9ef2;
+  --good:#58c98e; --warn:#f2b84b; --bad:#f08a80;
+  --good-bg:#17332a; --warn-bg:#3a2f12; --bad-bg:#3b1d1a; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+h1,h2,h3{font-family:var(--display);line-height:1.15;margin:0;text-wrap:balance}
+h2{font-size:1.5rem} h3{font-size:1.1rem}
+p{margin:0}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+header.top{background:var(--brand);color:var(--brand-ink)}
+.top .wrap{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;padding-top:14px;padding-bottom:14px}
+.brand{display:flex;flex-direction:column}
+.brand b{font-family:var(--display);font-size:1.25rem;letter-spacing:.2px}
+.brand span{font-size:.82rem;opacity:.85}
+.seg{display:inline-flex;background:rgba(0,0,0,.22);border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;color:var(--brand-ink);padding:6px 16px;border-radius:999px;cursor:pointer;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--brand-ink);color:var(--brand)}
+nav.tabs{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto}
+nav.tabs a{padding:12px 14px;text-decoration:none;color:var(--muted);font-weight:500;white-space:nowrap;border-bottom:3px solid transparent}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+main{padding:24px 0 48px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.card h3{margin-bottom:8px}
+.muted{color:var(--muted)} .small{font-size:.88rem}
+.eyebrow{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.between{justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:12px}
+.btn{border:1px solid var(--brand);background:var(--brand);color:var(--brand-ink);padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:600}
+.btn.ghost{background:transparent;color:var(--brand)}
+.btn.small{padding:5px 12px;font-size:.88rem}
+.btn:hover{filter:brightness(1.08)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.8rem;font-weight:600}
+.pill.good{background:var(--good-bg);color:var(--good)} .pill.warn{background:var(--warn-bg);color:var(--warn)} .pill.bad{background:var(--bad-bg);color:var(--bad)} .pill.plain{background:var(--surface2);color:var(--muted)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.bar{height:10px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brand);border-radius:99px}
+.bar.nt i{background:var(--nontech)}
+.hero{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center}
+@media (max-width:560px){.hero{grid-template-columns:1fr;justify-items:start}}
+.ring{position:relative;width:132px;height:132px}
+.ring svg{transform:rotate(-90deg)}
+.ring .v{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .v b{font-family:var(--display);font-size:2rem;line-height:1}
+.topic{display:flex;flex-direction:column;gap:10px}
+.topic .t{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+details{border-top:1px solid var(--line);padding-top:8px}
+details summary{cursor:pointer;font-weight:600;color:var(--brand)}
+details ul{margin:8px 0 0;padding-left:20px}
+details li{margin-bottom:4px}
+.opt{display:block;width:100%;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:10px 14px;cursor:pointer;margin-bottom:8px}
+.opt:hover:not([disabled]){border-color:var(--brand)}
+.opt.right{border-color:var(--good);background:var(--good-bg)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt[disabled]{cursor:default}
+.note{border-left:4px solid var(--accent);background:var(--surface2);padding:10px 14px;border-radius:0 8px 8px 0}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.scroll{overflow-x:auto}
+label{display:block;font-weight:600;margin-bottom:4px}
+textarea,select,input[type=text]{width:100%;background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{min-height:76px;resize:vertical}
+select{width:auto}
+video{width:100%;max-height:360px;background:#000;border-radius:8px}
+.tag{font-size:.76rem;font-weight:600;color:var(--muted)}
+svg text{font-family:var(--body);fill:var(--ink);font-size:13px}
+svg .k{fill:var(--muted);font-size:11.5px}
+svg .box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+svg .grp{fill:var(--surface2);stroke:var(--line);stroke-width:1}
+svg .ln{stroke:var(--brand);stroke-width:2;fill:none}
+footer{border-top:1px solid var(--line);padding:16px 0;color:var(--muted);font-size:.88rem}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .5s ease}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="brand"><b>JMIT Pre-Placement Program</b><span>BCA Department &middot; Draft v0.1 for discussion</span></div>
+  <div class="seg" role="group" aria-label="View as">
+    <button id="roleStudent" data-act="role" data-role="student" aria-pressed="true">Student view</button>
+    <button id="roleFaculty" data-act="role" data-role="faculty" aria-pressed="false">Faculty view</button>
+  </div>
+</div></header>
+<nav class="tabs" aria-label="Sections"><div class="wrap" id="nav"></div></nav>
+<main><div class="wrap" id="view"></div></main>
+<footer><div class="wrap">Draft for discussion. A student's progress is saved in this browser only, and the cohort figures in the faculty view are sample data, not real students.</div></footer>
+
+<script>
+/* ---------- Content ---------- */
+const TOPICS = {
+ c:{track:'tech',name:'C Programming',blurb:'Pointers, arrays and memory, the base of most technical rounds.',
+  notes:['A pointer stores a memory address. & gives an address, * reads the value at an address.','Array indexes start at 0, so int a[5] is valid for a[0] to a[4].','malloc gives uninitialised memory, calloc zero-fills it, and free must follow every malloc.','Know the difference between call by value and passing a pointer.'],
+  qs:[
+   {q:'Which operator gives the memory address of a variable in C?',o:['*','&','->','%'],a:1,e:'& is the address-of operator. * dereferences a pointer.'},
+   {q:'For int arr[5]; which index is the last valid one?',o:['5','4','6','1'],a:1,e:'Indexing starts at 0, so valid indexes are 0 to 4. arr[5] is out of bounds.'},
+   {q:'Which function allocates memory but does NOT set it to zero?',o:['calloc','free','malloc','realloc'],a:2,e:'malloc returns uninitialised memory. calloc zero-fills, realloc resizes, free releases.'},
+   {q:'What does this print? int x = 10; int *p = &x; printf("%d", *p);',o:['The address of x','10','A garbage value','A compile error'],a:1,e:'p holds the address of x, and *p reads the value stored there, which is 10.'}]},
+ java:{track:'tech',name:'Java & OOP',blurb:'Classes, inheritance, polymorphism and the collections framework.',
+  notes:['Four pillars: encapsulation, inheritance, polymorphism, abstraction.','Overloading is resolved at compile time. Overriding is resolved at run time.','final on a class stops inheritance, on a method stops overriding, on a variable stops reassignment.','List allows duplicates, Set does not, Map stores key-value pairs.'],
+  qs:[
+   {q:'Which keyword stops a class from being extended?',o:['static','abstract','final','private'],a:2,e:'A final class cannot have subclasses. String is a familiar example.'},
+   {q:'Method overloading is an example of which kind of polymorphism?',o:['Run-time','Compile-time','Dynamic binding','None of these'],a:1,e:'The compiler picks the overloaded method from the argument types. Overriding is the run-time kind.'},
+   {q:'What is the default value of an int instance variable in Java?',o:['null','1','0','Undefined'],a:2,e:'Fields get defaults: 0 for int, false for boolean, null for references. Local variables get none.'},
+   {q:'Which collection does not allow duplicate elements?',o:['ArrayList','HashSet','LinkedList','Vector'],a:1,e:'A Set holds unique elements. List implementations allow duplicates.'}]},
+ py:{track:'tech',name:'Python',blurb:'Core data types, loops and built-in functions.',
+  notes:['Lists and dicts are mutable. Tuples and strings are immutable.','range(start, stop, step) stops before stop.','Indentation defines blocks, so keep it consistent.','Use list comprehensions for short, readable transformations.'],
+  qs:[
+   {q:'What does print(type([])) display?',o:["<class 'tuple'>","<class 'list'>","<class 'dict'>","<class 'array'>"],a:1,e:'[] is an empty list literal, so its type is list.'},
+   {q:'Which of these data types is immutable?',o:['list','dict','set','tuple'],a:3,e:'Tuples cannot be changed after creation. Lists, dicts and sets can.'},
+   {q:"What is len('placement')?",o:['8','9','10','11'],a:1,e:'p-l-a-c-e-m-e-n-t is nine characters.'},
+   {q:'What does list(range(2, 10, 3)) give?',o:['[2, 5, 8]','[2, 5, 8, 11]','[2, 3, 10]','[3, 6, 9]'],a:0,e:'It starts at 2, steps by 3 and stops before 10: 2, 5, 8.'}]},
+ sql:{track:'tech',name:'SQL & DBMS',blurb:'Queries, joins, keys and normalisation.',
+  notes:['WHERE filters rows before grouping. HAVING filters groups after GROUP BY.','INNER JOIN keeps matches only. LEFT JOIN keeps every left row.','A primary key is unique and never NULL. A foreign key points to another table.','TRUNCATE empties a table, DROP removes the table itself.'],
+  qs:[
+   {q:'Which clause filters groups produced by GROUP BY?',o:['WHERE','HAVING','ORDER BY','LIMIT'],a:1,e:'HAVING works on grouped results. WHERE works on individual rows.'},
+   {q:'Which join returns every row from the left table, with right-table matches where they exist?',o:['INNER JOIN','RIGHT JOIN','LEFT JOIN','CROSS JOIN'],a:2,e:'LEFT JOIN keeps all left rows and fills unmatched right columns with NULL.'},
+   {q:'Can a primary key column contain NULL?',o:['Yes, once','Yes, any number of times','No','Only in MySQL'],a:2,e:'A primary key must identify each row uniquely, so NULL is not allowed.'},
+   {q:'Which command removes all rows but keeps the table structure, and takes no WHERE clause?',o:['DROP','TRUNCATE','REMOVE','ALTER'],a:1,e:'TRUNCATE empties the table and keeps its definition. DROP deletes the table itself.'}]},
+ web:{track:'tech',name:'HTML, CSS & JavaScript',blurb:'Front-end basics that every web role expects.',
+  notes:['Use semantic tags such as header, main, nav and footer.','CSS box model: content, padding, border, margin.','=== compares value and type. == converts types first.','The DOM is the page as objects. JavaScript reads and changes it.'],
+  qs:[
+   {q:'Which HTML element defines the most important heading?',o:['<head>','<h6>','<h1>','<title>'],a:2,e:'h1 is the top-level heading. h6 is the least important.'},
+   {q:'How does === differ from == in JavaScript?',o:['It compares without converting types','It compares only strings','It assigns a value','It is the same, only faster'],a:0,e:"=== checks value and type. == converts types first, so '5' == 5 is true but '5' === 5 is false."},
+   {q:'Which CSS property changes the colour of text?',o:['font-color','text-style','color','foreground'],a:2,e:'The color property sets text colour. background-color sets the background.'},
+   {q:'What does typeof null return in JavaScript?',o:['"null"','"undefined"','"object"','"number"'],a:2,e:'A long-standing quirk of the language. typeof null is "object".'}]},
+ back:{track:'tech',name:'Backend Basics',blurb:'HTTP, REST APIs and the layers of a Spring Boot application.',
+  notes:['REST maps actions to methods: GET reads, POST creates, PUT/PATCH updates, DELETE removes.','Status codes: 2xx success, 4xx client error, 5xx server error.','Spring Boot layers: controller (requests), service (logic), repository (database).','JSON is the usual data format between front end and back end.'],
+  qs:[
+   {q:'Which HTTP method is normally used to create a new resource in a REST API?',o:['GET','POST','DELETE','HEAD'],a:1,e:'POST creates. GET reads, PUT or PATCH updates, DELETE removes.'},
+   {q:'What does HTTP status 404 mean?',o:['Server error','Unauthorised','Resource not found','Request succeeded'],a:2,e:'404 means the server could not find the requested resource.'},
+   {q:'In a typical Spring Boot application, which layer talks to the database?',o:['Controller','View','Servlet filter','Repository'],a:3,e:'Controllers handle requests, services hold business logic, repositories handle data access.'},
+   {q:'Which status code range means a server-side error?',o:['2xx','3xx','4xx','5xx'],a:3,e:'5xx codes such as 500 mean the server failed. 4xx means a problem with the request.'}]},
+ comm:{track:'soft',name:'Communication',blurb:'Emails, listening and structuring spoken answers.',
+  notes:['Write a specific subject line: role, your name, your batch.','Listen actively. Paraphrase to confirm what you heard.','If you do not understand a question, ask politely for it to be repeated.','Structure spoken answers as Point, Reason, Example, Point.'],
+  qs:[
+   {q:'Which is the best subject line for an internship application email?',o:['Hi','Application for Java Developer Internship - Riya Sharma, BCA 2026','URGENT!!! PLEASE READ','(no subject)'],a:1,e:'A specific subject tells the reader the role, who you are and your batch at a glance.'},
+   {q:'Which behaviour shows active listening?',o:["Finishing the speaker's sentences",'Checking your phone between points','Paraphrasing what you heard to confirm it','Preparing your reply while they talk'],a:2,e:'Paraphrasing shows you understood and gives the speaker a chance to correct you.'},
+   {q:'In an interview you do not understand a question. What should you do?',o:['Guess and answer quickly','Stay silent','Change the topic','Ask politely for it to be repeated or clarified'],a:3,e:'Clarifying is a strength. A wrong guess costs more than a short question.'},
+   {q:'Which structure keeps a spoken answer clear and short?',o:['Point, Reason, Example, Point','Background, more background, apology','Example only','A long story, then the answer'],a:0,e:'This is the PREP structure. State the point, give a reason, add an example, then restate the point.'}]},
+ inter:{track:'soft',name:'Interpersonal Skills',blurb:'Teamwork, feedback and handling disagreement.',
+  notes:['Raise problems with the person first, in private, and focus on the work.','Empathy means understanding how someone feels, not agreeing with everything.','Take feedback by listening fully, asking for examples, then deciding what to apply.','Settle disagreements by comparing options against the shared goal.'],
+  qs:[
+   {q:'A teammate missed a deadline and your part is blocked. What is the best first step?',o:['Report them to the faculty at once','Talk to them privately to learn the cause and agree a new date','Do their part without telling anyone','Post about it in the group chat'],a:1,e:'A private conversation solves most problems early and keeps trust.'},
+   {q:'What does empathy mean?',o:['Agreeing with everyone','Giving advice quickly','Avoiding conflict','Understanding and acknowledging how another person feels'],a:3,e:'Empathy is about understanding feelings. You can show it and still disagree.'},
+   {q:'A senior gives you critical feedback on your code. What is the most professional response?',o:['Listen fully, ask for examples, then decide what to apply','Explain why you were right','Ignore it','Defend yourself in front of the team'],a:0,e:'Asking for examples turns criticism into something you can act on.'},
+   {q:'Two teammates disagree on an approach. A useful move is to:',o:['Let the louder one win','Vote without discussion','Compare both options against the project goal and agree the criteria','Skip the decision'],a:2,e:'Shared criteria move the discussion from people to the problem.'}]},
+ soft:{track:'soft',name:'Workplace Soft Skills',blurb:'Time management, professionalism and mindset.',
+  notes:['Sort tasks by urgent and important. Do urgent and important work first.','If you will be late, tell people early, apologise briefly and offer a new time.','A growth mindset says "not yet", not "I cannot".','When a brief is unclear, ask early and write down your assumptions.'],
+  qs:[
+   {q:'In the Eisenhower matrix, a task that is both urgent and important should be:',o:['Delegated','Done first','Dropped','Moved to next month'],a:1,e:'Urgent and important tasks come first. Important but not urgent tasks get scheduled.'},
+   {q:'You will be late to a client call because of traffic. What is best?',o:['Join late and say nothing','Skip the call','Inform them early, apologise briefly and suggest a new time','Blame the traffic repeatedly'],a:2,e:'Early notice and a clear alternative respect the other person\'s time.'},
+   {q:'Which statement shows a growth mindset?',o:["I'm just bad at coding",'Some people are born with it',"I'll avoid hard problems","I can't do this yet, so I'll practise and ask for help"],a:3,e:'"Yet" turns a fixed limit into a plan.'},
+   {q:'Your task brief is unclear. What should you do first?',o:['Ask clarifying questions early and note your assumptions','Start and hope','Wait until the deadline','Copy someone else\'s work'],a:0,e:'Early questions are cheap. Late rework is expensive.'}]},
+ intv:{track:'soft',name:'Interview Preparation',blurb:'STAR answers, self-introduction and closing questions.',
+  notes:['STAR: Situation, Task, Action, Result. Keep Action and Result the longest.','Self-introduction in 60 to 90 seconds: present, relevant background, why this role.','For a weakness, name a real one and show what you are doing about it.','Always prepare two or three questions to ask the interviewer.'],
+  qs:[
+   {q:'What does STAR stand for in behavioural answers?',o:['Skill, Task, Attitude, Reward','Situation, Task, Action, Result','Story, Target, Approach, Review','Summary, Task, Answer, Reflection'],a:1,e:'Situation, Task, Action, Result is a simple frame for real examples.'},
+   {q:'Which is the best structure for "Tell me about yourself"?',o:['Your life story from childhood','Only your hobbies','Present situation, relevant background, why this role','Reading your resume aloud'],a:2,e:'Keep it to about 60 to 90 seconds and end on why you fit the role.'},
+   {q:'Asked about your weakness, the best answer is:',o:['I have none','I work too hard','Blame a former teammate','A real, work-related weakness plus what you are doing to improve it'],a:3,e:'Honesty plus a plan shows self-awareness.'},
+   {q:'At the end: "Do you have any questions for us?" Best reply:',o:['No, thank you','When will I get a raise?','Ask about the team, expectations for the role and learning opportunities','Ask nothing to save time'],a:2,e:'Good questions show interest and help you judge the role too.'}]}
+};
+const TECH = Object.keys(TOPICS).filter(k=>TOPICS[k].track==='tech');
+const SOFT = Object.keys(TOPICS).filter(k=>TOPICS[k].track==='soft');
+
+const IQ = [
+ ['Tell me about yourself.','Present role, relevant background, why this job. Aim for 60 to 90 seconds.'],
+ ['Why should we hire you?','Match two or three of your strongest skills to the job description, with one example.'],
+ ['Describe a project you built.','Say the problem, your part, the tools, and one thing that went wrong and how you fixed it.'],
+ ['Tell me about a time you worked in a team.','Use STAR. Name your own contribution, not only the team outcome.'],
+ ['What is your biggest weakness?','Pick a real, work-related one and describe the steps you are taking.'],
+ ['Where do you see yourself in five years?','Show a learning direction that fits the role. Avoid naming a competitor or a job title.']
+];
+
+const LESSONS = [
+ ['Pointers in C in 10 minutes','C Programming','10 min'],
+ ['OOP with a real example','Java & OOP','12 min'],
+ ['SQL joins explained with two tables','SQL & DBMS','9 min'],
+ ['Writing your first REST endpoint','Backend Basics','15 min'],
+ ['Answering "Tell me about yourself"','Interview Preparation','6 min'],
+ ['Writing a professional email','Communication','7 min']
+];
+
+const COHORT_NAMES = ['Aarav Mehta','Simran Kaur','Rohit Verma','Ananya Gupta','Karan Singh','Priya Sharma','Mohit Saini','Neha Rani','Harsh Malik','Pooja Devi','Vishal Kumar','Komal Arora','Rahul Chauhan','Divya Bansal'];
+
+/* ---------- State ---------- */
+const KEY='jmit-preplacement-draft-v1';
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+function seed(){
+  const d=(n,t,s)=>({topic:t,score:s,total:4,at:'2026-11-0'+n});
+  return {role:'student',attempts:[d(2,'c',3),d(2,'java',2),d(3,'sql',2),d(4,'web',3),d(5,'comm',3),d(5,'java',3)]};
+}
+let S = load() || seed();
+const UI = {quiz:null,status:'all',sort:'ready-desc',videoUrl:null};
+
+/* ---------- Scoring ---------- */
+function latest(t){ for(let i=S.attempts.length-1;i>=0;i--) if(S.attempts[i].topic===t) return Math.round(100*S.attempts[i].score/S.attempts[i].total); return null; }
+function avg(list,get){ return Math.round(list.reduce((s,k)=>s+(get(k)||0),0)/list.length); }
+function readiness(techPct,softPct){ return Math.round(0.6*techPct+0.4*softPct); }
+function band(p){ return p>=70?['Interview-ready','good']:p>=40?['Building','warn']:['Getting started','bad']; }
+function pill(p){ const b=band(p); return `<span class="pill ${b[1]}">${b[0]}</span>`; }
+function pct(v){ return v==null?'<span class="muted">not tried</span>':`<span class="num">${v}%</span>`; }
+
+/* ---------- Sample cohort (deterministic) ---------- */
+function rng(seedv){ return function(){ seedv|=0; seedv=seedv+0x6D2B79F5|0; let t=Math.imul(seedv^seedv>>>15,1|seedv); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+const COHORT = (function(){
+  const r=rng(2026);
+  return COHORT_NAMES.map(name=>{
+    const ability=30+r()*60, scores={};
+    Object.keys(TOPICS).forEach(k=>{ scores[k]= r()<0.18?null: Math.max(0,Math.min(100,Math.round((ability+(r()-.5)*40)/25)*25)); });
+    const t=avg(TECH,k=>scores[k]), s=avg(SOFT,k=>scores[k]);
+    return {name,scores,tech:t,soft:s,ready:readiness(t,s),taken:Object.values(scores).filter(v=>v!=null).length};
+  });
+})();
+
+/* ---------- Helpers ---------- */
+const $ = id=>document.getElementById(id);
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function bar(p,cls){ return `<div class="bar ${cls||''}" role="img" aria-label="${p} percent"><i style="width:${p}%"></i></div>`; }
+async function copyText(text,btn){
+  const old=btn.textContent;
+  try{ await navigator.clipboard.writeText(text); btn.textContent='Copied'; }
+  catch(e){ btn.textContent='Copy blocked, select the text manually'; }
+  setTimeout(()=>btn.textContent=old,1800);
+}
+
+/* ---------- Views ---------- */
+function viewDashboard(){
+  const t=avg(TECH,latest), s=avg(SOFT,latest), r=readiness(t,s), C=2*Math.PI*52;
+  const all=Object.keys(TOPICS);
+  const next=all.slice().sort((a,b)=>(latest(a)||0)-(latest(b)||0))[0];
+  const recent=S.attempts.slice(-5).reverse();
+  const row=k=>`<div class="topic"><div class="t"><span>${TOPICS[k].name}</span>${pct(latest(k))}</div>${bar(latest(k)||0,TOPICS[k].track==='soft'?'nt':'')}</div>`;
+  return `
+  <div class="stack">
+  <div class="card hero">
+    <div class="ring"><svg width="132" height="132" viewBox="0 0 132 132" aria-hidden="true">
+      <circle cx="66" cy="66" r="52" fill="none" stroke="var(--surface2)" stroke-width="12"/>
+      <circle cx="66" cy="66" r="52" fill="none" stroke="var(--brand)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-r/100)).toFixed(1)}"/></svg>
+      <div class="v"><b class="num">${r}</b><span class="small muted">of 100</span></div></div>
+    <div class="stack"><div><span class="eyebrow">Placement readiness</span><h2>${band(r)[0]}</h2></div>
+      <p class="muted">Technical counts for 60 percent and non-technical for 40 percent. Each topic uses your latest quiz score. These weights are a starting point for faculty to agree.</p>
+      <div class="row"><a class="btn" href="#practice" id="goPractice">Go to practice</a><span class="small muted">Next suggested topic: <b>${TOPICS[next].name}</b></span></div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card stack"><div class="row between"><h3>Technical</h3><span class="num">${t}%</span></div>${TECH.map(row).join('')}</div>
+    <div class="card stack"><div class="row between"><h3>Non-technical</h3><span class="num">${s}%</span></div>${SOFT.map(row).join('')}</div>
+  </div>
+  <div class="card"><h3>Recent attempts</h3>
+    <div class="scroll"><table><thead><tr><th>Topic</th><th>Score</th><th>Date</th></tr></thead><tbody>
+    ${recent.map(a=>`<tr><td>${TOPICS[a.topic].name}</td><td class="num">${a.score} / ${a.total}</td><td class="num">${a.at}</td></tr>`).join('')||'<tr><td colspan="3" class="muted">No attempts yet.</td></tr>'}
+    </tbody></table></div>
+    <p style="margin-top:12px"><button class="btn ghost small" data-act="reset">Reset demo progress</button></p></div>
+  </div>`;
+}
+
+function topicCard(k){
+  const t=TOPICS[k], l=latest(k);
+  return `<div class="card topic"><div><span class="tag">${t.track==='tech'?'TECHNICAL':'NON-TECHNICAL'}</span><h3>${t.name}</h3><p class="muted small">${t.blurb}</p></div>
+   <div class="row between"><span class="small">Latest: ${pct(l)}</span><button class="btn small" data-act="quiz" data-topic="${k}">${l==null?'Start quiz':'Retake quiz'}</button></div>
+   <details><summary>Handout notes</summary><ul>${t.notes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul>
+   <p style="margin-top:10px"><button class="btn ghost small" data-act="copy-notes" data-topic="${k}">Copy notes</button></p></details></div>`;
+}
+function viewPractice(){
+  if(UI.quiz) return viewQuiz();
+  return `<div class="stack"><div><h2>Practice</h2><p class="muted">Each quiz has four questions with an explanation after every answer. Open a handout for a one-minute revision before you start.</p></div>
+  <h3>Technical</h3><div class="grid g3">${TECH.map(topicCard).join('')}</div>
+  <h3>Non-technical</h3><div class="grid g3">${SOFT.map(topicCard).join('')}</div></div>`;
+}
+function viewQuiz(){
+  const q=UI.quiz, t=TOPICS[q.topic];
+  if(q.done){
+    const sc=q.picks.filter((p,i)=>p===t.qs[i].a).length, p=Math.round(100*sc/t.qs.length);
+    return `<div class="card stack"><span class="eyebrow">${t.name}</span><h2>You scored ${sc} out of ${t.qs.length}</h2>
+      <p>${p>=75?'Strong result. Try another topic.':p>=50?'Good start. Read the handout and retake to improve.':'Read the handout, then try again. Early scores are expected.'}</p>
+      ${t.qs.map((x,i)=>`<div class="note"><b>${i+1}. ${esc(x.q)}</b><br>${q.picks[i]===x.a?'<span class="pill good">Correct</span>':`<span class="pill bad">Incorrect</span> Correct answer: ${esc(x.o[x.a])}`}<br><span class="small muted">${esc(x.e)}</span></div>`).join('')}
+      <div class="row"><button class="btn" data-act="quiz" data-topic="${q.topic}">Retake</button><button class="btn ghost" data-act="quiz-exit">Back to practice</button></div></div>`;
+  }
+  const item=t.qs[q.i], picked=q.picks[q.i], answered=picked!==undefined;
+  return `<div class="card stack"><div class="row between"><span class="eyebrow">${t.name} &middot; Question ${q.i+1} of ${t.qs.length}</span><button class="btn ghost small" data-act="quiz-exit">Exit</button></div>
+   ${bar(Math.round(100*q.i/t.qs.length))}
+   <h3 style="font-family:var(--body);font-weight:600">${esc(item.q)}</h3>
+   <div role="group" aria-label="Answer options">${item.o.map((o,i)=>{
+     let cls=''; if(answered){ if(i===item.a) cls='right'; else if(i===picked) cls='wrong'; }
+     return `<button class="opt ${cls}" data-act="pick" data-i="${i}" ${answered?'disabled':''}>${esc(o)}</button>`; }).join('')}</div>
+   ${answered?`<div class="note"><b>${picked===item.a?'Correct.':'Not quite.'}</b> ${esc(item.e)}</div>
+   <div><button class="btn" id="nextBtn" data-act="next">${q.i===t.qs.length-1?'Finish quiz':'Next question'}</button></div>`:''}</div>`;
+}
+
+function viewInterview(){
+  return `<div class="stack"><div><h2>Interview preparation</h2><p class="muted">Build a STAR answer, then rehearse it aloud with the timer estimate. Common questions are below.</p></div>
+  <div class="grid g2">
+   <div class="card stack"><h3>STAR answer builder</h3>
+    <div><label for="st-s">Situation</label><textarea id="st-s" placeholder="Where and when? What was the context?"></textarea></div>
+    <div><label for="st-t">Task</label><textarea id="st-t" placeholder="What were you responsible for?"></textarea></div>
+    <div><label for="st-a">Action</label><textarea id="st-a" placeholder="What did you personally do?"></textarea></div>
+    <div><label for="st-r">Result</label><textarea id="st-r" placeholder="What changed? Use a number if you can."></textarea></div>
+    <div class="row"><button class="btn" data-act="star-build">Build my answer</button></div></div>
+   <div class="card stack"><h3>Your answer</h3><p id="starOut" class="muted">Fill in the four boxes and choose Build my answer. The result appears here.</p>
+    <p id="starMeta" class="small muted"></p><div><button class="btn ghost small" id="starCopy" data-act="star-copy" hidden>Copy answer</button></div></div>
+  </div>
+  <div class="card"><h3>Common questions</h3>
+   ${IQ.map(x=>`<details><summary>${esc(x[0])}</summary><p style="margin-top:6px">${esc(x[1])}</p></details>`).join('')}</div></div>`;
+}
+
+function viewLessons(){
+  return `<div class="stack"><div><h2>Video lessons</h2><p class="muted">The platform is built to hold short video lessons beside each topic's quiz and handout. These six are planned titles. You can try the player below with any video file from your computer.</p></div>
+  <div class="grid g2">
+   <div class="card stack"><h3>Planned first lessons</h3>
+    ${LESSONS.map(l=>`<div class="row between"><div><b>${l[0]}</b><div class="small muted">${l[1]}</div></div><div class="row"><span class="num small">${l[2]}</span><span class="pill plain">Planned</span></div></div>`).join('')}</div>
+   <div class="card stack"><h3>Try the lesson player</h3>
+    <div id="vidBox">${UI.videoUrl?`<video controls src="${UI.videoUrl}"></video>`:'<p class="muted">No video loaded yet.</p>'}</div>
+    <div><label for="vidFile">Choose a video file</label><input type="file" id="vidFile" accept="video/*"></div>
+    <p class="small muted">The file plays on your device only. Nothing is uploaded.</p></div>
+  </div></div>`;
+}
+
+function statusOf(p){ return p>=70?'good':p>=40?'warn':'bad'; }
+function viewCohort(){
+  let rows=COHORT.filter(c=>UI.status==='all'||statusOf(c.ready)===UI.status);
+  const sorters={'ready-desc':(a,b)=>b.ready-a.ready,'ready-asc':(a,b)=>a.ready-b.ready,'name':(a,b)=>a.name.localeCompare(b.name)};
+  rows=rows.slice().sort(sorters[UI.sort]);
+  const topicAvg=k=>{ const v=COHORT.map(c=>c.scores[k]).filter(x=>x!=null); return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0; };
+  const weakest=Object.keys(TOPICS).sort((a,b)=>topicAvg(a)-topicAvg(b));
+  const counts={good:0,warn:0,bad:0}; COHORT.forEach(c=>counts[statusOf(c.ready)]++);
+  return `<div class="stack"><div class="row between"><div><h2>Cohort overview</h2><p class="muted">Sample data for 14 fictional students, to show what faculty would see.</p></div></div>
+  <div class="grid g3">
+   <div class="card"><span class="eyebrow">Interview-ready</span><h2 class="num">${counts.good}</h2></div>
+   <div class="card"><span class="eyebrow">Building</span><h2 class="num">${counts.warn}</h2></div>
+   <div class="card"><span class="eyebrow">Needs support</span><h2 class="num">${counts.bad}</h2></div>
+  </div>
+  <div class="card stack"><h3>Average score by topic, weakest first</h3>
+   ${weakest.map(k=>`<div class="topic"><div class="t"><span>${TOPICS[k].name}</span><span class="num">${topicAvg(k)}%</span></div>${bar(topicAvg(k),TOPICS[k].track==='soft'?'nt':'')}</div>`).join('')}</div>
+  <div class="card stack"><div class="row between"><h3>Students</h3>
+    <div class="row"><label for="fStatus" class="small" style="margin:0">Show</label>
+     <select id="fStatus"><option value="all">Everyone</option><option value="good" ${UI.status==='good'?'selected':''}>Interview-ready</option><option value="warn" ${UI.status==='warn'?'selected':''}>Building</option><option value="bad" ${UI.status==='bad'?'selected':''}>Needs support</option></select>
+     <label for="fSort" class="small" style="margin:0">Sort</label>
+     <select id="fSort"><option value="ready-desc">Readiness, high first</option><option value="ready-asc" ${UI.sort==='ready-asc'?'selected':''}>Readiness, low first</option><option value="name" ${UI.sort==='name'?'selected':''}>Name</option></select>
+     <button class="btn ghost small" data-act="copy-csv">Copy as CSV</button></div></div>
+   <div class="scroll"><table><thead><tr><th>Student</th><th>Technical</th><th>Non-technical</th><th>Readiness</th><th>Topics tried</th><th>Status</th></tr></thead><tbody>
+   ${rows.map(c=>`<tr><td>${c.name}</td><td class="num">${c.tech}%</td><td class="num">${c.soft}%</td><td class="num">${c.ready}</td><td class="num">${c.taken} / 10</td><td>${pill(c.ready)}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">No students match this filter.</td></tr>'}
+   </tbody></table></div></div></div>`;
+}
+
+function arch(){
+  return `<svg viewBox="0 0 760 300" width="100%" role="img" aria-label="Architecture: browser apps call a Spring Boot REST API, which uses a MySQL database and file storage">
+   <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--brand)"/></marker></defs>
+   <rect class="grp" x="10" y="20" width="190" height="260" rx="10"/><text x="24" y="44" class="k">BROWSER</text>
+   <rect class="box" x="30" y="66" width="150" height="64" rx="8"/><text x="105" y="94" text-anchor="middle">Student app</text><text x="105" y="114" text-anchor="middle" class="k">quizzes, notes, videos</text>
+   <rect class="box" x="30" y="156" width="150" height="64" rx="8"/><text x="105" y="184" text-anchor="middle">Faculty app</text><text x="105" y="204" text-anchor="middle" class="k">cohort, content</text>
+   <text x="105" y="258" text-anchor="middle" class="k">React single-page app</text>
+   <rect class="grp" x="280" y="20" width="230" height="260" rx="10"/><text x="294" y="44" class="k">SPRING BOOT REST API</text>
+   <rect class="box" x="300" y="58" width="190" height="42" rx="8"/><text x="395" y="84" text-anchor="middle">Auth (JWT, roles)</text>
+   <rect class="box" x="300" y="110" width="190" height="42" rx="8"/><text x="395" y="136" text-anchor="middle">Quiz service</text>
+   <rect class="box" x="300" y="162" width="190" height="42" rx="8"/><text x="395" y="188" text-anchor="middle">Progress and analytics</text>
+   <rect class="box" x="300" y="214" width="190" height="42" rx="8"/><text x="395" y="240" text-anchor="middle">Content service</text>
+   <rect class="grp" x="590" y="20" width="160" height="260" rx="10"/><text x="604" y="44" class="k">STORAGE</text>
+   <rect class="box" x="606" y="86" width="128" height="64" rx="8"/><text x="670" y="114" text-anchor="middle">MySQL</text><text x="670" y="134" text-anchor="middle" class="k">users, attempts</text>
+   <rect class="box" x="606" y="176" width="128" height="64" rx="8"/><text x="670" y="204" text-anchor="middle">File storage</text><text x="670" y="224" text-anchor="middle" class="k">videos, handouts</text>
+   <line class="ln" x1="200" y1="150" x2="278" y2="150" marker-end="url(#ah)"/><text x="239" y="140" text-anchor="middle" class="k">HTTPS</text>
+   <text x="239" y="170" text-anchor="middle" class="k">JSON</text>
+   <line class="ln" x1="510" y1="118" x2="604" y2="118" marker-end="url(#ah)"/><line class="ln" x1="510" y1="208" x2="604" y2="208" marker-end="url(#ah)"/>
+  </svg>`;
+}
+function viewAbout(){
+  const built=[['Student dashboard','Readiness score, track breakdown, recent attempts'],['Practice','10 topics, 40 quiz questions with explanations, handout notes'],['Interview preparation','STAR answer builder, common questions with guidance'],['Video lessons','Player and planned lesson list, ready for real uploads'],['Faculty cohort view','Status counts, weakest topics, student table (sample data)']];
+  const phases=[['Phase 1, pilot','One BCA batch. Quizzes, handouts, student dashboard and a faculty cohort view with real logins.'],['Phase 2, content and analytics','Faculty-written question banks, timed mock tests, aptitude and reasoning, topic-level reports.'],['Phase 3, videos and mock interviews','Short video lessons per topic, mock interview slots and faculty feedback forms.'],['Phase 4, placement cell','Company-wise readiness reports, resume checker and drive tracking.']];
+  const tables=[['users','id, name, email, role (student, faculty), batch, section'],['topics','id, name, track (technical, non-technical)'],['questions','id, topic_id, text, options, correct, explanation'],['attempts','id, user_id, topic_id, score, total, taken_at'],['resources','id, topic_id, type (handout, video), title, file_path']];
+  return `<div class="stack">
+  <div><h2>About this draft</h2><p class="muted" style="max-width:68ch">The aim is to help JMIT BCA students prepare for placements and to give faculty a clear picture of where each student and the whole batch stand. This page explains what the draft shows, how the real system would be built, and what we need from colleagues.</p></div>
+  <div class="card stack"><h3>What this draft already does</h3>
+   <div class="scroll"><table><tbody>${built.map(b=>`<tr><td><b>${b[0]}</b></td><td>${b[1]}</td></tr>`).join('')}</tbody></table></div>
+   <p class="small muted">This is a front-end prototype. It stores a student's progress in this browser only, so it shows the experience, not the final system.</p></div>
+  <div class="card stack"><h3>Proposed architecture</h3>${arch()}
+   <p class="small muted">A React front end calls a Spring Boot REST API over HTTPS. The API checks the user's role, runs quizzes, records attempts and serves content. MySQL holds users and results. Videos and handouts sit in file storage, so lessons can be added later without changing the code.</p></div>
+  <div class="grid g2">
+   <div class="card stack"><h3>Main database tables</h3>${tables.map(t=>`<div><b class="num">${t[0]}</b><div class="small muted">${t[1]}</div></div>`).join('')}</div>
+   <div class="card stack"><h3>Roadmap</h3>${phases.map((p,i)=>`<div><b>${p[0]}</b><div class="small muted">${p[1]}</div></div>`).join('')}</div>
+  </div>
+  <div class="card stack"><h3>Questions for colleagues</h3>
+   <ol style="margin:0;padding-left:20px" class="stack">
+    <li>Which subjects and topics should the first question banks cover for the 5th and 6th semester?</li>
+    <li>Are the readiness weights (60 percent technical, 40 percent non-technical) and the 40 and 70 cut-offs reasonable?</li>
+    <li>Who writes and reviews questions, and how often should they be refreshed?</li>
+    <li>What should the placement cell see, and what should stay between a student and their mentor?</li>
+    <li>Which aptitude and reasoning topics should come next?</li>
+   </ol></div>
+  </div>`;
+}
+
+/* ---------- Router ---------- */
+const NAV = {
+  student:[['dashboard','Dashboard'],['practice','Practice'],['interview','Interview prep'],['lessons','Video lessons'],['about','About this draft']],
+  faculty:[['cohort','Cohort'],['lessons','Video lessons'],['about','About this draft']]
+};
+const VIEWS = {dashboard:viewDashboard,practice:viewPractice,interview:viewInterview,lessons:viewLessons,cohort:viewCohort,about:viewAbout};
+function current(){
+  const h=(location.hash||'').replace('#','');
+  const ok=NAV[S.role].map(n=>n[0]);
+  return ok.includes(h)?h:ok[0];
+}
+function render(){
+  const v=current();
+  $('roleStudent').setAttribute('aria-pressed',S.role==='student');
+  $('roleFaculty').setAttribute('aria-pressed',S.role==='faculty');
+  $('nav').innerHTML=NAV[S.role].map(n=>`<a href="#${n[0]}" ${n[0]===v?'aria-current="page"':''}>${n[1]}</a>`).join('');
+  $('view').innerHTML=VIEWS[v]();
+}
+window.addEventListener('hashchange',()=>{ UI.quiz=null; render(); window.scrollTo(0,0); });
+
+/* ---------- Events ---------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]'); if(!b) return;
+  const a=b.dataset.act;
+  if(a==='role'){ S.role=b.dataset.role; save(); UI.quiz=null; location.hash=NAV[S.role][0][0]; render(); }
+  else if(a==='quiz'){ UI.quiz={topic:b.dataset.topic,i:0,picks:[],done:false}; if(current()!=='practice'){location.hash='practice';} render(); window.scrollTo(0,0); }
+  else if(a==='quiz-exit'){ UI.quiz=null; render(); }
+  else if(a==='pick'){ const q=UI.quiz; if(q.picks[q.i]!==undefined) return; q.picks[q.i]=Number(b.dataset.i); render(); const n=$('nextBtn'); if(n) n.focus(); }
+  else if(a==='next'){ const q=UI.quiz, t=TOPICS[q.topic];
+    if(q.i<t.qs.length-1){ q.i++; }
+    else { const sc=q.picks.filter((p,i)=>p===t.qs[i].a).length; S.attempts.push({topic:q.topic,score:sc,total:t.qs.length,at:new Date().toISOString().slice(0,10)}); save(); q.done=true; }
+    render(); window.scrollTo(0,0); }
+  else if(a==='reset'){ S=seed(); save(); render(); }
+  else if(a==='copy-notes'){ const t=TOPICS[b.dataset.topic]; copyText(t.name+'\n'+t.notes.map(n=>'- '+n).join('\n'),b); }
+  else if(a==='copy-csv'){
+    const head='Name,Technical,NonTechnical,Readiness,TopicsTried';
+    copyText([head].concat(COHORT.map(c=>[c.name,c.tech,c.soft,c.ready,c.taken].join(','))).join('\n'),b); }
+  else if(a==='star-build'){
+    const g=id=>$(id).value.trim(), parts=[g('st-s'),g('st-t'),g('st-a'),g('st-r')];
+    if(parts.some(p=>!p)){ $('starOut').textContent='Please fill in all four boxes first.'; $('starMeta').textContent=''; $('starCopy').hidden=true; return; }
+    const text=parts.map(p=>/[.!?]$/.test(p)?p:p+'.').join(' ');
+    const words=text.split(/\s+/).length, secs=Math.round(words/130*60);
+    $('starOut').textContent=text; $('starOut').className='';
+    $('starMeta').textContent=words+' words, about '+secs+' seconds when spoken. Aim for 90 to 120 seconds.';
+    $('starCopy').hidden=false; }
+  else if(a==='star-copy'){ copyText($('starOut').textContent,b); }
+});
+document.addEventListener('change',e=>{
+  if(e.target.id==='fStatus'){ UI.status=e.target.value; render(); }
+  else if(e.target.id==='fSort'){ UI.sort=e.target.value; render(); }
+  else if(e.target.id==='vidFile'){
+    const f=e.target.files&&e.target.files[0]; if(!f) return;
+    if(UI.videoUrl) URL.revokeObjectURL(UI.videoUrl);
+    UI.videoUrl=URL.createObjectURL(f);
+    $('vidBox').innerHTML='<video controls></video>'; $('vidBox').firstChild.src=UI.videoUrl; }
+});
+render();
+</script>
+</body>
+</html>
